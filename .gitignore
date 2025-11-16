@@ -1,0 +1,19 @@
+# Python venv
+backend/.venv/
+
+# Python junk
+backend/__pycache__/
+backend/**/*.pyc
+
+# Django
+backend/staticfiles/
+backend/media/
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+
+# macOS
+.DS_Store
+EOF
