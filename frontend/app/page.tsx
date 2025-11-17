@@ -1,9 +1,11 @@
 import Image from "next/image";
 
+import BuyerDashboard from "@/components/BuyerDashboard";
+
 export default function Home() {
   return (
     <div className="bg-white font-sans">
-      <main className="mx-auto w-full max-w-7xl px-6 py-24">
+      <main className="mx-auto w-full max-w-7xl px-6 py-24 space-y-16">
         {/* Hero */}
         <section className="grid gap-10 rounded-lg bg-white p-8 shadow-sm sm:grid-cols-2 sm:items-center">
           <div>
@@ -14,10 +16,8 @@ export default function Home() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-lg text-zinc-600">
-              Menjaga kualitas udang Indonesia dari tambak sampai ke pembeli
-              internasional. Digitalkan QC, simulasikan pemeriksaan pra-ekspor,
-              dan jual hanya batch yang terverifikasi dengan bukti audit yang
-              tidak dapat diubah.
+              Menjaga kualitas udang Indonesia dari tambak sampai ke pembeli internasional. Digitalkan QC,
+              simulasikan pemeriksaan pra-ekspor, dan jual hanya batch yang terverifikasi dengan bukti audit yang tidak dapat diubah.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -28,7 +28,12 @@ export default function Home() {
                 For Suppliers — Dashboard
               </a>
 
-              <a href="/marketplace" className="inline-flex items-center justify-center rounded-full border border-black/8 px-5 py-3 text-sm font-medium text-black hover:bg-black/4">Marketplace — Verified Batches</a>
+              <a
+                href="/marketplace"
+                className="inline-flex items-center justify-center rounded-full border border-black/8 px-5 py-3 text-sm font-medium text-black hover:bg-black/4"
+              >
+                Marketplace — Verified Batches
+              </a>
 
               <a
                 href="/buyers"
@@ -57,77 +62,62 @@ export default function Home() {
           <div className="flex items-center justify-center">
             <div className="w-full max-w-md rounded-md border border-orange-100 bg-white p-6 text-left">
               <h3 className="text-lg font-semibold text-black">Demo: Pre-export QC Simulation</h3>
-              <p className="mt-2 text-sm text-zinc-600">Upload batch → system runs simulated tests (Cesium, Mercury, Antibiotics) → result appended to ledger.</p>
+              <p className="mt-2 text-sm text-zinc-600">
+                Upload batch → system runs simulated tests (Cesium, Mercury, Antibiotics) → result appended to ledger.
+              </p>
 
               <div className="mt-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-black p-2 text-white text-xs">1</div>
-                  <div>
-                    <div className="font-medium">Register Batch</div>
-                    <div className="text-sm text-zinc-600">Species, harvest date, volume, region</div>
+                {[
+                  { label: "Register Batch", detail: "Species, harvest date, volume, region" },
+                  { label: "Simulated QC", detail: "Contaminant checks & pass/fail rules" },
+                  { label: "Append to Ledger", detail: "Hash-linked QC history (immutable)" },
+                ].map((step, index) => (
+                  <div key={step.label} className="flex items-center gap-3">
+                    <div className="rounded-full bg-black p-2 text-white text-xs">{index + 1}</div>
+                    <div>
+                      <div className="font-medium">{step.label}</div>
+                      <div className="text-sm text-zinc-600">{step.detail}</div>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-black p-2 text-white text-xs">2</div>
-                  <div>
-                    <div className="font-medium">Simulated QC</div>
-                    <div className="text-sm text-zinc-600">Contaminant checks & pass/fail rules</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-black p-2 text-white text-xs">3</div>
-                  <div>
-                    <div className="font-medium">Append to Ledger</div>
-                    <div className="text-sm text-zinc-600">Hash-linked QC history (immutable)</div>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="mt-6 flex gap-3">
-                <a href="/demo" className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">Try Demo</a>
-                <a href="/docs" className="rounded-full border border-orange-200 px-4 py-2 text-sm font-medium text-black hover:bg-orange-50">Read Docs</a>
+                <a href="/demo" className="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
+                  Try Demo
+                </a>
+                <a
+                  href="/docs"
+                  className="rounded-full border border-orange-200 px-4 py-2 text-sm font-medium text-black hover:bg-orange-50"
+                >
+                  Read Docs
+                </a>
               </div>
             </div>
           </div>
         </section>
 
         {/* How it works */}
-        <section className="mt-12 rounded-lg bg-transparent">
+        <section className="rounded-lg bg-transparent">
           <h2 className="text-2xl font-semibold text-black">How it works</h2>
-          <p className="mt-2 max-w-3xl text-sm text-zinc-600">A simple flow that reduces contamination risk and automates export readiness.</p>
+          <p className="mt-2 max-w-3xl text-sm text-zinc-600">
+            A simple flow that reduces contamination risk and automates export readiness.
+          </p>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-5">
-            <div className="col-span-1 rounded-lg bg-white p-4 text-center shadow-sm">
-              <div className="text-2xl">📝</div>
-              <div className="mt-2 font-medium">Register</div>
-              <div className="mt-1 text-xs text-zinc-600">Create batch profile</div>
-            </div>
-
-            <div className="col-span-1 rounded-lg bg-white p-4 text-center shadow-sm">
-              <div className="text-2xl">🔬</div>
-              <div className="mt-2 font-medium">Pre-QC</div>
-              <div className="mt-1 text-xs text-zinc-600">Simulated lab checks</div>
-            </div>
-
-            <div className="col-span-1 rounded-lg bg-white p-4 text-center shadow-sm">
-              <div className="text-2xl">🔗</div>
-              <div className="mt-2 font-medium">Ledger</div>
-              <div className="mt-1 text-xs text-zinc-600">Immutable QC history</div>
-            </div>
-
-            <div className="col-span-1 rounded-lg bg-white p-4 text-center shadow-sm">
-              <div className="text-2xl">🛒</div>
-              <div className="mt-2 font-medium">Marketplace</div>
-              <div className="mt-1 text-xs text-zinc-600">List verified batches</div>
-            </div>
-
-            <div className="col-span-1 rounded-lg bg-white p-4 text-center shadow-sm">
-              <div className="text-2xl">📄</div>
-              <div className="mt-2 font-medium">Docs</div>
-              <div className="mt-1 text-xs text-zinc-600">Auto-generate export docs</div>
-            </div>
+            {[
+              { icon: "📝", title: "Register", detail: "Create batch profile" },
+              { icon: "🔬", title: "Pre-QC", detail: "Simulated lab checks" },
+              { icon: "🔗", title: "Ledger", detail: "Immutable QC history" },
+              { icon: "🛒", title: "Marketplace", detail: "List verified batches" },
+              { icon: "📄", title: "Docs", detail: "Auto-generate export docs" },
+            ].map((item) => (
+              <div key={item.title} className="rounded-lg bg-white p-4 text-center shadow-sm">
+                <div className="text-2xl">{item.icon}</div>
+                <div className="mt-2 font-medium">{item.title}</div>
+                <div className="mt-1 text-xs text-zinc-600">{item.detail}</div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -142,30 +132,105 @@ export default function Home() {
         </div>
 
         {/* Features */}
-        <section className="mt-12 grid gap-6 sm:grid-cols-3">
-          <div className="rounded-lg border border-black/8 bg-white p-6 shadow-sm">
-            <h4 className="font-semibold">Traceability</h4>
-            <p className="mt-2 text-sm text-zinc-600">Farm-to-shipment records with structured QC data to pinpoint contamination sources.</p>
-          </div>
-
-          <div className="rounded-lg border border-black/8 bg-white p-6 shadow-sm">
-            <h4 className="font-semibold">QC Ledger</h4>
-            <p className="mt-2 text-sm text-zinc-600">Hash-linked QC logs that prevent retroactive tampering and increase buyer confidence.</p>
-          </div>
-
-          <div className="rounded-lg border border-black/8 bg-white p-6 shadow-sm">
-            <h4 className="font-semibold">Automation & Matchmaking</h4>
-            <p className="mt-2 text-sm text-zinc-600">Auto document generation and AI-assisted matchmaking for faster, safer deals.</p>
-          </div>
+        <section className="grid gap-6 sm:grid-cols-3">
+          {[
+            {
+              title: "Traceability",
+              detail: "Farm-to-shipment records with structured QC data to pinpoint contamination sources.",
+            },
+            {
+              title: "QC Ledger",
+              detail: "Hash-linked QC logs that prevent retroactive tampering and increase buyer confidence.",
+            },
+            {
+              title: "Automation & Matchmaking",
+              detail: "Auto document generation and AI-assisted matchmaking for faster, safer deals.",
+            },
+          ].map((feature) => (
+            <div key={feature.title} className="rounded-lg border border-black/8 bg-white p-6 shadow-sm">
+              <h4 className="font-semibold">{feature.title}</h4>
+              <p className="mt-2 text-sm text-zinc-600">{feature.detail}</p>
+            </div>
+          ))}
         </section>
 
         {/* CTA bar */}
-        <section className="mt-12 rounded-lg bg-white p-8 text-center shadow-sm">
+        <section className="rounded-lg bg-white p-8 text-center shadow-sm">
           <h3 className="text-xl font-semibold text-black">Ready to reduce export risk and reach global buyers?</h3>
-          <p className="mt-2 text-sm text-zinc-600">Start with a demo or register your first batch to see the QC simulation and ledger in action.</p>
+          <p className="mt-2 text-sm text-zinc-600">
+            Start with a demo or register your first batch to see the QC simulation and ledger in action.
+          </p>
           <div className="mt-4 flex justify-center gap-4">
-            <a href="/demo" className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">Try Demo</a>
-            <a href="/signup" className="rounded-full border border-black/8 px-5 py-3 text-sm font-medium hover:bg-black/4">Create Account</a>
+            <a href="/demo" className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+              Try Demo
+            </a>
+            <a
+              href="/signup"
+              className="rounded-full border border-black/8 px-5 py-3 text-sm font-medium hover:bg-black/4"
+            >
+              Create Account
+            </a>
+          </div>
+        </section>
+
+        {/* Buyer experience detail */}
+        <section className="space-y-4 rounded-3xl bg-white/80 p-8 shadow-xl shadow-zinc-950/5 ring-1 ring-zinc-100">
+          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">IndoXport Buyer Flow</p>
+          <h2 className="text-3xl font-semibold text-zinc-900 sm:text-4xl">
+            Match exporter demand to clean Indonesian batches faster
+          </h2>
+          <p className="text-lg text-zinc-600">
+            The buyer experience begins with structured requirements, a simulated quality-check ledger, and a curated marketplace
+            that highlights the right exporters and documentation bundles.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                title: "Structured demand",
+                body: "Buyers specify contaminants, volumes, and shipping windows in one form.",
+              },
+              {
+                title: "Immersive matching",
+                body: "Exporters see which supplier batches pass the simulated QC and fit their needs.",
+              },
+              {
+                title: "Actionable docs",
+                body: "Revalidation triggers templated invoices, COOs, and health certifications for demos.",
+              },
+            ].map((card) => (
+              <div key={card.title} className="rounded-2xl border border-zinc-100 bg-zinc-50/80 p-4 text-sm">
+                <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">{card.title}</p>
+                <p className="mt-2 text-zinc-600">{card.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Requirement board + marketplace matching */}
+        <section className="space-y-8 rounded-3xl bg-white/90 p-8 shadow-2xl shadow-zinc-950/5 ring-1 ring-zinc-100">
+          <BuyerDashboard />
+        </section>
+
+        {/* Payment simulation callout */}
+        <section className="grid gap-6 rounded-3xl bg-zinc-950/80 p-8 text-white shadow-2xl shadow-zinc-950/20 sm:grid-cols-2">
+          <div>
+            <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">Payment simulation</p>
+            <h3 className="mt-2 text-2xl font-semibold">T/T and L/C inspired flows</h3>
+            <p className="mt-4 max-w-lg text-sm text-zinc-200">
+              Pilih jalur T/T atau L/C untuk menunjukkan bagaimana IndoXport melacak QC, dokumen, dan status pembayaran di dalam MVP.
+            </p>
+          </div>
+          <div className="space-y-4 rounded-2xl border border-zinc-800/40 bg-white/5 p-4 text-sm">
+            {[
+              { label: "1. QC revalidation", detail: "Simulated lab pass recorded in ledger." },
+              { label: "2. Commercial docs", detail: "Invoice, COO, and health certificate ready for export." },
+              { label: "3. Payment status", detail: "T/T wiring or L/C confirmation surfaced for demos." },
+            ].map((step) => (
+              <div key={step.label} className="space-y-1">
+                <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">{step.label}</p>
+                <p className="text-zinc-50">{step.detail}</p>
+              </div>
+            ))}
           </div>
         </section>
       </main>

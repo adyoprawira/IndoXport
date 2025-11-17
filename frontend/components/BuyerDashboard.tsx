@@ -1,0 +1,72 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+
+import RequirementCard from "@/components/RequirementCard";
+import RequirementForm from "@/components/RequirementForm";
+import { BuyerRequirement, fetchRequirements } from "@/lib/api";
+
+export default function BuyerDashboard() {
+  const [requirements, setRequirements] = useState<BuyerRequirement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadRequirements = useCallback(async () => {
+    setLoading(true);
+    try {
+      const payload = await fetchRequirements();
+      setRequirements(payload.results);
+      setError(null);
+    } catch (loadError) {
+      setError("Unable to reach the buyer ledger.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadRequirements();
+  }, [loadRequirements]);
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <RequirementForm onSaved={loadRequirements} />
+      <div className="space-y-4">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
+            Requirement board
+          </p>
+          <h2 className="text-2xl font-semibold text-zinc-900">
+            Matching exporters to buyer demand
+          </h2>
+          <p className="text-sm text-zinc-500">
+            The ledger-like digest surfaces QC-approved requirements for exporters
+            to explore. Tap into a requirement to see marketplace matches,
+            revalidate QC, and trigger document packs.
+          </p>
+        </div>
+        {error ? (
+          <p className="text-sm text-rose-600">{error}</p>
+        ) : loading ? (
+          <p className="text-sm text-zinc-500">Loading requirements…</p>
+        ) : (
+          <div className="space-y-4">
+            {requirements.length === 0 ? (
+              <p className="text-sm text-zinc-500">
+                No buyer requirements yet. Use the form to publish one.
+              </p>
+            ) : (
+              requirements.map((requirement) => (
+                <RequirementCard
+                  key={requirement.id}
+                  requirement={requirement}
+                  onUpdated={loadRequirements}
+                />
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
