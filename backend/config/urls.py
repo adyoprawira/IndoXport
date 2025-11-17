@@ -28,5 +28,11 @@ router.register(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-     path("api/", include(router.urls)),
+    path("api/", include(router.urls)),
+    # Stub API for user settings (backend/user_settings)
+    path("api/", include("user_settings.urls")),
+    path("", include("buyers.urls"))
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

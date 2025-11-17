@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent: #FF7A00; /* orange accent */
 }
 
 @theme inline {
@@ -12,10 +13,24 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Force light theme (override prefers-color-scheme: dark) so the site
+   remains white / orange / black as requested. These rules are intentionally
+   specific and use !important to override Tailwind's dark-mode utilities. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+
+  html, body, #__next, main, header, footer, section, div {
+    background-color: #ffffff !important;
+    color: #171717 !important;
+  }
+
+  /* Buttons and CTA accents should keep the orange accent */
+  .bg-orange-600, .bg-orange-50, .text-orange-600 {
+    background-color: var(--accent) !important;
+    color: #fff !important;
   }
 }
 
