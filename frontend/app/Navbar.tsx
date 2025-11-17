@@ -9,6 +9,7 @@ const navLinks = [
 	{ href: "/products", label: "Products" },
 	{ href: "/about", label: "About" },
 	{ href: "/contact", label: "Contact" },
+	{ href: "/settings", label: "Settings" },
 ];
 
 export default function Navbar() {
@@ -54,7 +55,7 @@ export default function Navbar() {
 							<div className="absolute right-0 mt-2 w-44 rounded-md border border-gray-100 bg-white shadow-md">
 								<ul className="p-2">
 									<li>
-										<Link href="/profile" className="block rounded-md px-3 py-2 text-sm text-black hover:bg-orange-50">
+										<Link href="/user-profile" className="block rounded-md px-3 py-2 text-sm text-black hover:bg-orange-50">
 											My Profile
 										</Link>
 									</li>
