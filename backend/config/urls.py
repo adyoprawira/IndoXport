@@ -23,6 +23,11 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # Stub API for user settings (backend/user_settings)
     path("api/", include("user_settings.urls")),
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("buyers.urls")),
 ]
 
 if settings.DEBUG:

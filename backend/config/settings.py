@@ -37,21 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Local apps
-    "user_settings",
-]
-
-# Add corsheaders for local development so the Next frontend can call the stub
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "corsheaders",
-    # Local apps
-    "user_settings",
+    "buyers",
 ]
 
 MIDDLEWARE = [
