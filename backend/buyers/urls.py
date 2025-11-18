@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-from django.urls import path
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
-from buyers.views import matches_view, revalidate_view, requirements_view
+from buyers.views import BuyerMarketplaceView, RequirementViewSet
+
+router = DefaultRouter()
+router.register(
+    r"buyer/requirements",
+    RequirementViewSet,
+    basename="buyer-requirement",
+)
 
 urlpatterns = [
-    path("api/requirements/", requirements_view, name="requirements"),
-    path(
-        "api/requirements/<int:pk>/matches/",
-        matches_view,
-        name="requirement_matches",
-    ),
-    path(
-        "api/requirements/<int:pk>/revalidate/",
-        revalidate_view,
-        name="requirement_revalidate",
-    ),
+    path("api/buyer/marketplace/", BuyerMarketplaceView.as_view(), name="buyer-marketplace"),
+    path("api/", include(router.urls)),
 ]
