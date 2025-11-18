@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'suppliers',
     "corsheaders",
     "buyers",
+    "accounts",
 ]
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
