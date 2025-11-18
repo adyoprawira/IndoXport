@@ -16,8 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+from suppliers.views import ProductBatchViewSet
+
+router = DefaultRouter()
+router.register(
+    r"supplier/batches",
+    ProductBatchViewSet,
+    basename="supplier-batch",
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("buyers.urls")),
+    path("api/", include(router.urls)),
+    # Stub API for user settings (backend/user_settings)
+    path("api/", include("user_settings.urls")),
+    path("", include("buyers.urls"))
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
