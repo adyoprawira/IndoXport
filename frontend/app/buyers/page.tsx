@@ -60,7 +60,7 @@ export default function BuyersPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 rounded-3xl bg-white p-8 shadow-xl shadow-zinc-200/60 ring-1 ring-zinc-100 lg:grid-cols-[1fr_1.2fr]">
+        <section className="rounded-3xl bg-white p-8 shadow-xl shadow-zinc-200/60 ring-1 ring-zinc-100">
           <div className="space-y-5">
             <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">Requirement board</p>
             <h2 className="text-2xl font-semibold text-zinc-900">
@@ -75,15 +75,16 @@ export default function BuyersPage() {
               <ul className="mt-3 space-y-3 text-sm text-zinc-700">
                 {matchingFlow.map((step) => (
                   <li key={step.title}>
-                    <span className="font-semibold text-zinc-900">{step.title}</span> — {step.detail}
+                    <span className="font-semibold text-zinc-900">{step.title}</span> - {step.detail}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-          <div className="space-y-5">
-            <BuyerDashboard />
-          </div>
+        </section>
+
+        <section className="rounded-3xl bg-white p-8 shadow-xl shadow-zinc-200/60 ring-1 ring-zinc-100">
+          <BuyerDashboard />
         </section>
 
         <section className="rounded-3xl bg-white p-8 text-zinc-900 shadow-2xl shadow-zinc-950/10 ring-1 ring-zinc-100">

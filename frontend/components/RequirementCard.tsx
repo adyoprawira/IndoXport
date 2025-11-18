@@ -58,6 +58,26 @@ export default function RequirementCard({ requirement }: RequirementCardProps) {
     () => buildQualityPreview(requirement.quality_summary ?? null),
     [requirement.quality_summary],
   );
+  const { summaryDocuments, metricsDocuments } = useMemo(() => {
+    if (!qualityDocuments) {
+      return { summaryDocuments: null, metricsDocuments: null };
+    }
+    const summaryFields = new Set(["status", "recorded_at", "hash", "previous_hash"]);
+    const summary: Record<string, string | number | null | undefined> = {};
+    const metrics: Record<string, string | number | null | undefined> = {};
+    Object.entries(qualityDocuments).forEach(([key, value]) => {
+      if (summaryFields.has(key)) {
+        summary[key] = value;
+      } else {
+        metrics[key] = value;
+      }
+    });
+
+    return {
+      summaryDocuments: Object.keys(summary).length ? summary : null,
+      metricsDocuments: Object.keys(metrics).length ? metrics : null,
+    };
+  }, [qualityDocuments]);
 
   const handleShowMatches = async () => {
     setIsFetchingMatches(true);
@@ -187,18 +207,27 @@ export default function RequirementCard({ requirement }: RequirementCardProps) {
         </div>
       ) : null}
 
-      {qualityDocuments ? (
+      {summaryDocuments ? (
         <section className="mt-4 grid gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/80 p-4 text-sm text-zinc-600">
           <p className="text-xs uppercase tracking-widest text-zinc-500">
             QC summary
           </p>
-          <DocumentPreview documents={qualityDocuments} />
+          <DocumentPreview documents={summaryDocuments} />
         </section>
-      ) : (
+      ) : qualityDocuments ? null : (
         <p className="mt-4 text-xs text-zinc-400">
           QC simulation pending for this requirement.
         </p>
       )}
+
+      {metricsDocuments ? (
+        <section className="mt-4 grid gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/80 p-4 text-sm text-zinc-600">
+          <p className="text-xs uppercase tracking-widest text-zinc-500">
+            QC metrics
+          </p>
+          <DocumentPreview documents={metricsDocuments} />
+        </section>
+      ) : null}
     </article>
   );
 }

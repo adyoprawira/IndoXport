@@ -29,9 +29,9 @@ export default function BuyerDashboard() {
   }, [loadRequirements]);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+    <div className="space-y-6">
       <RequirementForm onSaved={loadRequirements} />
-      <div className="space-y-4">
+      <section className="space-y-4 rounded-3xl border border-zinc-100 bg-white/90 p-6 shadow-lg shadow-zinc-900/5">
         <div className="flex flex-col gap-2">
           <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
             Requirement board
@@ -62,7 +62,7 @@ export default function BuyerDashboard() {
             )}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

@@ -65,6 +65,268 @@ export type PaginatedResponse<T> = {
   results: T[];
 };
 
+const BUYER_DEMO_REQUIREMENTS: BuyerRequirement[] = [
+  {
+    id: 101,
+    commodity: "Vannamei Shrimp (26/30)",
+    buyer_name: "Nordic Clean Seafood",
+    min_volume: 2500,
+    max_volume: 4200,
+    allowed_contaminants: {
+      mercury_ppm: 0.35,
+      vibrio_detected: 0,
+      antibiotic_residue_ppb: 0,
+    },
+    shipping_window_start: "2025-12-05",
+    shipping_window_end: "2025-12-23",
+    destination_country: "Norway",
+    standards: ["EU", "MSC", "BRC"],
+    notes:
+      "Demo of supplier -> QC -> ledger log. Co-packed lots must already pass IndoXport simulation.",
+    status: "ledger_hashed",
+    quality_summary: {
+      status: "QC hash committed",
+      result: {
+        ledger_slot: "QC-2025-11-18-001",
+        mercury_ppm: 0.22,
+        vibrio_detected: "none",
+      },
+      hash: "0x9f4cbe1284fb66aa",
+      previous_hash: "0x77d8bf12aad3009c",
+      created_at: "2025-11-18T04:10:00Z",
+    },
+    created_at: "2025-11-18T04:00:00Z",
+    updated_at: "2025-11-18T04:00:00Z",
+  },
+  {
+    id: 102,
+    commodity: "Black Tiger Shrimp (16/20)",
+    buyer_name: "Gulf Trace Imports",
+    min_volume: 1800,
+    max_volume: 3200,
+    allowed_contaminants: {
+      mercury_ppm: 0.28,
+      listeria_cfu: 0,
+      antibiotic_residue_ppb: 0,
+    },
+    shipping_window_start: "2025-12-12",
+    shipping_window_end: "2026-01-05",
+    destination_country: "United Arab Emirates",
+    standards: ["HACCP", "Dubai Municipality", "Halal"],
+    notes:
+      "Buyer approval stage. Dubai financiers want to see QC fingerprint plus ledger reference before matching.",
+    status: "buyer_approved",
+    quality_summary: {
+      status: "Buyer QC revalidated",
+      result: {
+        ledger_slot: "QC-2025-11-17-044",
+        mercury_ppm: 0.18,
+        pathogen_scan: "clear",
+        auto_docs: "invoice + COO prefills ready",
+      },
+      hash: "0xc31fb2041dd9c21e",
+      previous_hash: "0x43b1fbc52ffca911",
+      created_at: "2025-11-17T15:30:00Z",
+    },
+    created_at: "2025-11-17T15:00:00Z",
+    updated_at: "2025-11-17T15:00:00Z",
+  },
+  {
+    id: 103,
+    commodity: "Yellowfin Tuna Loins",
+    buyer_name: "Tokyo Metro Retail",
+    min_volume: 900,
+    max_volume: 1500,
+    allowed_contaminants: {
+      mercury_ppm: 0.4,
+      histamine_ppm: 35,
+    },
+    shipping_window_start: "2025-12-20",
+    shipping_window_end: "2026-01-18",
+    destination_country: "Japan",
+    standards: ["JAS", "HACCP", "MAFF"],
+    notes:
+      "Auto-documentation and payment simulation highlighted. Show how ledger unlocks LC milestones.",
+    status: "docs_seeded",
+    quality_summary: {
+      status: "Documentation staged",
+      result: {
+        ledger_slot: "QC-2025-11-16-019",
+        histamine_ppm: 24,
+        payment_track: "L/C mock - step 2",
+      },
+      hash: "0xa1ffde44bb98c001",
+      previous_hash: "0x0fffda3310ab88ee",
+      created_at: "2025-11-16T11:00:00Z",
+    },
+    created_at: "2025-11-16T10:45:00Z",
+    updated_at: "2025-11-16T10:45:00Z",
+  },
+];
+
+const BUYER_DEMO_MATCHES: Record<number, MarketplaceBatch[]> = {
+  101: [
+    {
+      batch_id: 401,
+      batch_code: "LMP-557A",
+      species: "Vannamei Shrimp",
+      supplier: { id: 55, name: "PT Laut Bersih" },
+      size_range: { min_mm: 14, max_mm: 16 },
+      volume_available: 3200,
+      unit: "kg",
+      region: "Central Java",
+      country_of_origin: "Indonesia",
+      destination_country: "Norway",
+      harvest_date: "2025-11-05",
+      ready_date: "2025-11-28",
+      price_per_unit: "6.80",
+      contaminant_mercury_ppm: 0.22,
+      contaminant_cesium_ppm: 0.11,
+      contaminant_ecoli_cfu: 180,
+      quality_summary: {
+        status: "QC module pass",
+        result: {
+          moisture_control: "-25C IQF",
+          ledger_slot: "SUP-2025-11-18-31",
+        },
+        hash: "0x77ea1100bcffe21c",
+        previous_hash: "0x5500aa772134ff00",
+        created_at: "2025-11-18T02:15:00Z",
+      },
+    },
+    {
+      batch_id: 402,
+      batch_code: "SMG-882C",
+      species: "Vannamei Shrimp",
+      supplier: { id: 61, name: "Coastal Align Nusantara" },
+      size_range: { min_mm: 15, max_mm: 17 },
+      volume_available: 2500,
+      unit: "kg",
+      region: "Semarang",
+      country_of_origin: "Indonesia",
+      destination_country: "Norway",
+      ready_date: "2025-12-01",
+      price_per_unit: "7.10",
+      contaminant_mercury_ppm: 0.2,
+      contaminant_cesium_ppm: 0.09,
+      contaminant_ecoli_cfu: 160,
+      quality_summary: {
+        status: "Ledger replayed",
+        result: {
+          qc_against_requirement: "97% match",
+          ledger_slot: "SUP-2025-11-18-44",
+        },
+        hash: "0x9022bcf11dfe0911",
+        previous_hash: "0x7710bbbccaa7811f",
+        created_at: "2025-11-18T03:00:00Z",
+      },
+    },
+  ],
+  102: [
+    {
+      batch_id: 501,
+      batch_code: "BTN-447X",
+      species: "Black Tiger Shrimp",
+      supplier: { id: 72, name: "Makassar Deep Sea" },
+      size_range: { min_mm: 20, max_mm: 23 },
+      volume_available: 2100,
+      unit: "kg",
+      region: "South Sulawesi",
+      country_of_origin: "Indonesia",
+      destination_country: "United Arab Emirates",
+      harvest_date: "2025-11-01",
+      ready_date: "2025-11-25",
+      price_per_unit: "9.40",
+      contaminant_mercury_ppm: 0.17,
+      contaminant_cesium_ppm: 0.08,
+      contaminant_ecoli_cfu: 0,
+      quality_summary: {
+        status: "Buyer approval mirrored",
+        result: {
+          halal_ready: "Yes",
+          ledger_slot: "SUP-2025-11-17-11",
+        },
+        hash: "0x6110ddee22ff3900",
+        previous_hash: "0x5000abce22ff21ab",
+        created_at: "2025-11-17T14:10:00Z",
+      },
+    },
+  ],
+  103: [
+    {
+      batch_id: 601,
+      batch_code: "YFT-993K",
+      species: "Yellowfin Tuna",
+      supplier: { id: 83, name: "PT Samudera Tokyo Prep" },
+      size_range: { min_mm: 40, max_mm: 65 },
+      volume_available: 1100,
+      unit: "kg",
+      region: "Bitung",
+      country_of_origin: "Indonesia",
+      destination_country: "Japan",
+      harvest_date: "2025-10-28",
+      ready_date: "2025-12-18",
+      price_per_unit: "11.20",
+      contaminant_mercury_ppm: 0.33,
+      contaminant_cesium_ppm: 0.05,
+      contaminant_ecoli_cfu: 0,
+      quality_summary: {
+        status: "Docs + payment sync",
+        result: {
+          lc_checkpoint: "Doc set uploaded",
+          ledger_slot: "SUP-2025-11-16-05",
+        },
+        hash: "0x411a0bcf220011ee",
+        previous_hash: "0x3988aa550099abcf",
+        created_at: "2025-11-16T10:50:00Z",
+      },
+    },
+  ],
+};
+
+function cloneQualitySummary(
+  summary?: QualitySummary | null,
+): QualitySummary | null | undefined {
+  if (!summary) {
+    return summary;
+  }
+  return {
+    ...summary,
+    result: summary.result ? { ...summary.result } : summary.result,
+  };
+}
+
+function cloneRequirement(requirement: BuyerRequirement): BuyerRequirement {
+  return {
+    ...requirement,
+    allowed_contaminants: { ...requirement.allowed_contaminants },
+    standards: [...requirement.standards],
+    quality_summary: cloneQualitySummary(requirement.quality_summary),
+  };
+}
+
+function cloneBatch(batch: MarketplaceBatch): MarketplaceBatch {
+  return {
+    ...batch,
+    supplier: { ...batch.supplier },
+    size_range: { ...batch.size_range },
+    quality_summary: cloneQualitySummary(batch.quality_summary),
+  };
+}
+
+function buildBuyerDemoRequirements(): PaginatedResponse<BuyerRequirement> {
+  return {
+    count: BUYER_DEMO_REQUIREMENTS.length,
+    next: null,
+    previous: null,
+    results: BUYER_DEMO_REQUIREMENTS.map(cloneRequirement),
+  };
+}
+
+function getBuyerDemoMatches(requirementId: number): MarketplaceBatch[] {
+  return (BUYER_DEMO_MATCHES[requirementId] ?? []).map(cloneBatch);
+}
+
 const withAuthHeaders = (headers?: HeadersInit) => {
   const finalHeaders = new Headers(headers);
   if (BASIC_AUTH && !finalHeaders.has("Authorization")) {
@@ -112,7 +374,15 @@ async function apiFetch<T>(
 export async function fetchRequirements(): Promise<
   PaginatedResponse<BuyerRequirement>
 > {
-  return apiFetch(`/api/buyer/requirements/`);
+  try {
+    return await apiFetch(`/api/buyer/requirements/`);
+  } catch (error) {
+    console.warn(
+      "[IndoXport demo] Falling back to hardcoded buyer requirements.",
+      error,
+    );
+    return buildBuyerDemoRequirements();
+  }
 }
 
 export interface CreateRequirementPayload {
@@ -143,7 +413,17 @@ export async function createRequirement(
 export async function fetchMatches(
   requirementId: number,
 ): Promise<MarketplaceBatch[]> {
-  return apiFetch(`/api/buyer/requirements/${requirementId}/matches/`);
+  try {
+    return await apiFetch(
+      `/api/buyer/requirements/${requirementId}/matches/`,
+    );
+  } catch (error) {
+    console.warn(
+      `[IndoXport demo] Using hardcoded buyer matches for requirement ${requirementId}.`,
+      error,
+    );
+    return getBuyerDemoMatches(requirementId);
+  }
 }
 
 export type MarketplaceFilters = Record<
