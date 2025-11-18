@@ -25,6 +25,8 @@ export default function RegisterPage() {
     birth_date: "",
   });
 
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+
   const update = (name: string, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -53,6 +55,33 @@ export default function RegisterPage() {
       }
 
       setStatus("Register success. Coba login sekarang.");
+      // store registered data so settings page can show registered data immediately
+      if (data && data.user && typeof window !== "undefined") {
+        try {
+          // merge backend returned user with submitted form (omit password)
+          const { password: _pw, ...formNoPw } = form as any;
+          let saved: any = { ...data.user, ...formNoPw };
+          // if a photo file was selected, upload it to backend/accounts
+          if (photoFile) {
+            try {
+              const fd = new FormData();
+              fd.append("file", photoFile);
+              fd.append("user_id", String(data.user.id));
+              const up = await fetch(`${API_BASE}/api/auth/profile/photo/`, {
+                method: "POST",
+                body: fd,
+              });
+              const upData = await up.json();
+              if (up.ok && upData.photoUrl) {
+                saved = { ...saved, photoUrl: upData.photoUrl };
+              }
+            } catch (e) {
+              // ignore upload errors for now
+            }
+          }
+          localStorage.setItem("auth_user", JSON.stringify(saved));
+        } catch (e) {}
+      }
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -91,6 +120,16 @@ export default function RegisterPage() {
               value={form.username}
               onChange={(e) => update("username", e.target.value)}
               required
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="text-xs font-medium text-slate-700">Upload Photo (optional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
+              className="mt-1 w-full text-sm"
             />
           </div>
 
