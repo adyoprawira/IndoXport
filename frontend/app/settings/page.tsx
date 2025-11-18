@@ -25,16 +25,31 @@ export default function SettingsPage() {
   const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
+    // Prefer backend-authenticated user stored in localStorage (set after login/register)
+    const stored = typeof window !== "undefined" ? localStorage.getItem("auth_user") : null;
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        // show immediately, but still fetch the canonical profile from backend
+        setUser(parsed);
+      } catch (e) {
+        // fallthrough to fetch
+      }
+    }
+
     let mounted = true;
     setLoading(true);
-    fetch(`${BACKEND_URL}/api/user/`)
+    // fetch full profile (includes identity_number, npwp, full_address, phone, mother_name, domicile, birth_place, birth_date)
+    fetch(`${BACKEND_URL}/api/auth/profile/`)
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load user");
         return r.json();
       })
       .then((data) => {
         if (!mounted) return;
-        setUser(data.user);
+        // merge any previously shown stored user with canonical backend fields
+        const merged = { ...(typeof window !== "undefined" && localStorage.getItem("auth_user") ? JSON.parse(localStorage.getItem("auth_user") as string) : {}), ...(data.user || {}) };
+        setUser(merged);
       })
       .catch((e) => {
         if (!mounted) return;
@@ -65,7 +80,7 @@ export default function SettingsPage() {
 
     setPwLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/change-password/`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/change-password/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),
@@ -89,6 +104,17 @@ export default function SettingsPage() {
 
   // extended details in editable form
   const [details, setDetails] = useState<any>({
+    // registration/account fields
+    username: "",
+    role: "supplier",
+    identity_type: "",
+    identity_number: "",
+    npwp: "",
+    full_address: "",
+    mother_name: "",
+    domicile: "",
+    birth_place: "",
+    birth_date: "",
     name: "",
     email: "",
     company: "",
@@ -127,14 +153,25 @@ export default function SettingsPage() {
     contactPerson: { name: "", phone: "", email: "" },
     apiKeyMasked: "",
     notes: "",
+    photoUrl: "",
   });
 
   useEffect(() => {
     if (user) {
       setDetails((d: any) => ({
         ...d,
-        name: user.name,
+        name: user.full_name ?? user.name ?? user.first_name ?? "",
         email: user.email,
+        username: user.username ?? d.username,
+        role: user.role ?? d.role,
+        identity_type: user.identity_type ?? d.identity_type,
+        identity_number: user.identity_number ?? d.identity_number,
+        npwp: user.npwp ?? d.npwp,
+        full_address: user.full_address ?? d.full_address,
+        mother_name: user.mother_name ?? d.mother_name,
+        domicile: user.domicile ?? d.domicile,
+        birth_place: user.birth_place ?? d.birth_place,
+        birth_date: user.birth_date ?? d.birth_date,
         company: user.company ?? "",
         companyWebsite: user.companyWebsite ?? "",
         registrationNumber: user.registrationNumber ?? "",
@@ -164,6 +201,7 @@ export default function SettingsPage() {
         labContact: user.labContact ?? d.labContact,
         apiKeyMasked: user.apiKeyMasked ?? d.apiKeyMasked,
         notes: user.notes ?? d.notes,
+        photoUrl: user.photoUrl ?? d.photoUrl ?? null,
       }));
     }
   }, [user]);
@@ -173,7 +211,7 @@ export default function SettingsPage() {
     setProfileMsg(null);
     setProfileSaving(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/user/`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/profile/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user: details }),
@@ -212,9 +250,14 @@ export default function SettingsPage() {
         <form onSubmit={handleSaveProfile} className="grid gap-8 sm:grid-cols-2">
           <div className="rounded-lg border border-black/8 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-medium">Profile</h2>
+            {details.photoUrl && (
+              <div className="mt-4">
+                <img src={details.photoUrl} alt="Profile photo" className="w-20 h-20 rounded-full object-cover border" />
+              </div>
+            )}
             <div className="mt-4 space-y-4 text-sm text-zinc-700">
               <div>
-                <label className="text-xs text-zinc-500">Name</label>
+                <label className="text-xs text-zinc-500">Full Name</label>
                 <div className="mt-1">
                   <input
                     value={details.name}
@@ -226,18 +269,80 @@ export default function SettingsPage() {
               </div>
 
               <div>
+                <label className="text-xs text-zinc-500">Username</label>
+                <div className="mt-1">
+                  <input
+                    value={details.username}
+                    onChange={(e) => setDetails({ ...details, username: e.target.value })}
+                    className="w-full rounded-md border px-3 py-2"
+                    disabled={!editMode}
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="text-xs text-zinc-500">Email</label>
                 <div className="mt-1">
-                  <input value={details.email} className="w-full rounded-md border px-3 py-2" disabled />
+                  <input
+                    type="email"
+                    value={details.email}
+                    className="w-full rounded-md border px-3 py-2"
+                    disabled
+                  />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs text-zinc-500">Company</label>
+                <label className="text-xs text-zinc-500">Password</label>
                 <div className="mt-1">
                   <input
-                    value={details.company}
-                    onChange={(e) => setDetails({ ...details, company: e.target.value })}
+                    type="password"
+                    value={""}
+                    placeholder="(not shown) use Change Password below"
+                    className="w-full rounded-md border px-3 py-2 text-sm text-zinc-500"
+                    disabled
+                  />
+                  <div className="text-xs text-zinc-400 mt-1">Password tidak disimpan/ditampilkan. Gunakan bagian "Change Password" untuk mengganti kata sandi.</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-zinc-500">Role</label>
+                <div className="mt-1">
+                  <select
+                    value={details.role}
+                    onChange={(e) => setDetails({ ...details, role: e.target.value })}
+                    className="w-full rounded-md border px-3 py-2"
+                    disabled={!editMode}
+                  >
+                    <option value="supplier">Supplier</option>
+                    <option value="buyer">Buyer</option>
+                    <option value="exporter">Exporter</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-zinc-500">Identity Type</label>
+                <div className="mt-1">
+                  <select
+                    value={details.identity_type}
+                    onChange={(e) => setDetails({ ...details, identity_type: e.target.value })}
+                    className="w-full rounded-md border px-3 py-2"
+                    disabled={!editMode}
+                  >
+                    <option value="ID_CARD">ID Card (KTP)</option>
+                    <option value="PASSPORT">Passport</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-zinc-500">Identity Number</label>
+                <div className="mt-1">
+                  <input
+                    value={details.identity_number}
+                    onChange={(e) => setDetails({ ...details, identity_number: e.target.value })}
                     className="w-full rounded-md border px-3 py-2"
                     disabled={!editMode}
                   />
@@ -245,19 +350,32 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-zinc-500">Registration Number</label>
+                <label className="text-xs text-zinc-500">NPWP</label>
                 <div className="mt-1">
                   <input
-                    value={details.registrationNumber}
-                    onChange={(e) => setDetails({ ...details, registrationNumber: e.target.value })}
+                    value={details.npwp}
+                    onChange={(e) => setDetails({ ...details, npwp: e.target.value })}
                     className="w-full rounded-md border px-3 py-2"
                     disabled={!editMode}
                   />
                 </div>
               </div>
 
+              <div className="md:col-span-2">
+                <label className="text-xs text-zinc-500">Alamat Lengkap</label>
+                <div className="mt-1">
+                  <textarea
+                    value={details.full_address}
+                    onChange={(e) => setDetails({ ...details, full_address: e.target.value })}
+                    className="w-full rounded-md border px-3 py-2"
+                    rows={3}
+                    disabled={!editMode}
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="text-xs text-zinc-500">Phone</label>
+                <label className="text-xs text-zinc-500">Nomor Telepon</label>
                 <div className="mt-1">
                   <input
                     value={details.phone}
@@ -269,11 +387,11 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-zinc-500">Address</label>
+                <label className="text-xs text-zinc-500">Nama Ibu Kandung</label>
                 <div className="mt-1">
                   <input
-                    value={details.address}
-                    onChange={(e) => setDetails({ ...details, address: e.target.value })}
+                    value={details.mother_name}
+                    onChange={(e) => setDetails({ ...details, mother_name: e.target.value })}
                     className="w-full rounded-md border px-3 py-2"
                     disabled={!editMode}
                   />
@@ -281,11 +399,11 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-zinc-500">Warehouse address</label>
+                <label className="text-xs text-zinc-500">Domisili</label>
                 <div className="mt-1">
                   <input
-                    value={details.warehouseAddress}
-                    onChange={(e) => setDetails({ ...details, warehouseAddress: e.target.value })}
+                    value={details.domicile}
+                    onChange={(e) => setDetails({ ...details, domicile: e.target.value })}
                     className="w-full rounded-md border px-3 py-2"
                     disabled={!editMode}
                   />
@@ -293,97 +411,27 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs text-zinc-500">Company website</label>
+                <label className="text-xs text-zinc-500">Tempat Lahir</label>
                 <div className="mt-1">
                   <input
-                    value={details.companyWebsite}
-                    onChange={(e) => setDetails({ ...details, companyWebsite: e.target.value })}
+                    value={details.birth_place}
+                    onChange={(e) => setDetails({ ...details, birth_place: e.target.value })}
                     className="w-full rounded-md border px-3 py-2"
                     disabled={!editMode}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-zinc-500">Tax ID</label>
-                  <div className="mt-1">
-                    <input
-                      value={details.taxId}
-                      onChange={(e) => setDetails({ ...details, taxId: e.target.value })}
-                      className="w-full rounded-md border px-3 py-2"
-                      disabled={!editMode}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs text-zinc-500">Business type</label>
-                  <div className="mt-1">
-                    <input
-                      value={details.businessType}
-                      onChange={(e) => setDetails({ ...details, businessType: e.target.value })}
-                      className="w-full rounded-md border px-3 py-2"
-                      disabled={!editMode}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-zinc-500">Years in business</label>
-                  <div className="mt-1">
-                    <input
-                      type="number"
-                      value={details.yearsInBusiness}
-                      onChange={(e) => setDetails({ ...details, yearsInBusiness: e.target.value })}
-                      className="w-full rounded-md border px-3 py-2"
-                      disabled={!editMode}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs text-zinc-500">Annual volume (tons)</label>
-                  <div className="mt-1">
-                    <input
-                      type="number"
-                      value={details.annualVolumeTons}
-                      onChange={(e) => setDetails({ ...details, annualVolumeTons: e.target.value })}
-                      className="w-full rounded-md border px-3 py-2"
-                      disabled={!editMode}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <label className="text-xs text-zinc-500">Primary contact</label>
-                <div className="mt-1 grid gap-2">
+              <div>
+                <label className="text-xs text-zinc-500">Tanggal Lahir</label>
+                <div className="mt-1">
                   <input
-                    value={details.contactPerson.name}
-                    onChange={(e) => setDetails({ ...details, contactPerson: { ...details.contactPerson, name: e.target.value } })}
-                    placeholder="Name"
+                    type="date"
+                    value={details.birth_date}
+                    onChange={(e) => setDetails({ ...details, birth_date: e.target.value })}
                     className="w-full rounded-md border px-3 py-2"
                     disabled={!editMode}
                   />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      value={details.contactPerson.phone}
-                      onChange={(e) => setDetails({ ...details, contactPerson: { ...details.contactPerson, phone: e.target.value } })}
-                      placeholder="Phone"
-                      className="w-full rounded-md border px-3 py-2"
-                      disabled={!editMode}
-                    />
-                    <input
-                      value={details.contactPerson.email}
-                      onChange={(e) => setDetails({ ...details, contactPerson: { ...details.contactPerson, email: e.target.value } })}
-                      placeholder="Email"
-                      className="w-full rounded-md border px-3 py-2"
-                      disabled={!editMode}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -687,7 +735,30 @@ export default function SettingsPage() {
           </div>
         </form>
       ) : (
-        <div className="text-sm text-zinc-600">No user data</div>
+        <div className="text-sm text-zinc-600">
+          <div className="mb-4">You are not logged in.</div>
+          <div className="flex gap-3">
+            <a href="/login" className="rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white">Login</a>
+            <button
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  const r = await fetch(`${BACKEND_URL}/api/auth/profile/`);
+                  if (!r.ok) throw new Error("Failed to load demo profile");
+                  const data = await r.json();
+                  setUser(data.user);
+                } catch (e: any) {
+                  setError(String(e));
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="rounded-md border border-black/8 px-4 py-2 text-sm"
+            >
+              Load demo profile
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
