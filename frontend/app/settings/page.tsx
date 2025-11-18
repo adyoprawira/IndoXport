@@ -2,11 +2,81 @@
 
 import { useEffect, useState } from "react";
 
+type ContactPerson = {
+  name?: string;
+  phone?: string;
+  email?: string;
+};
+
+type QualityManager = {
+  name?: string;
+  email?: string;
+};
+
+type LabContact = {
+  name?: string;
+  phone?: string;
+};
+
+type Packaging = {
+  type?: string;
+  kgPerBox?: number;
+};
+
+type QcThresholds = {
+  mercury?: number;
+  antibiotics?: number;
+};
+
+type Certifications = Record<string, boolean>;
+type CertificationDates = Record<string, string>;
+
 type User = {
-  id: number;
-  name: string;
-  email: string;
+  id?: number;
+  name?: string;
+  first_name?: string;
+  full_name?: string;
+  email?: string;
+  username?: string;
+  role?: string;
+  identity_type?: string;
+  identity_number?: string;
+  npwp?: string;
+  full_address?: string;
+  mother_name?: string;
+  domicile?: string;
+  birth_place?: string;
+  birth_date?: string;
   company?: string;
+  companyWebsite?: string;
+  registrationNumber?: string;
+  taxId?: string;
+  businessType?: string;
+  yearsInBusiness?: string;
+  annualVolumeTons?: string;
+  phone?: string;
+  address?: string;
+  warehouseAddress?: string;
+  region?: string;
+  farmLocation?: string;
+  contactPerson?: ContactPerson;
+  certifications?: Certifications;
+  certificationDates?: CertificationDates;
+  preferredPayment?: string;
+  preferredPorts?: string;
+  paymentTerms?: string;
+  preferredIncoterm?: string;
+  packaging?: Packaging;
+  notifyEmail?: boolean;
+  notifySMS?: boolean;
+  bankAccountMasked?: string;
+  bankName?: string;
+  qcThresholds?: QcThresholds;
+  qualityManager?: QualityManager;
+  labContact?: LabContact;
+  apiKeyMasked?: string;
+  notes?: string;
+  photoUrl?: string | null;
 };
 
 export default function SettingsPage() {
