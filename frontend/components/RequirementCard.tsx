@@ -1,55 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import DocumentPreview from "@/components/DocumentPreview";
 import {
   fetchMatches,
-  revalidateRequirement,
-  SupplierMatch,
   type BuyerRequirement,
+  type MarketplaceBatch,
 } from "@/lib/api";
 
 type RequirementCardProps = {
   requirement: BuyerRequirement;
-  onUpdated: () => void;
 };
 
-export default function RequirementCard({
-  requirement,
-  onUpdated,
-}: RequirementCardProps) {
-  const [matches, setMatches] = useState<SupplierMatch[] | null>(null);
-  const [documents, setDocuments] = useState<Record<string, string> | null>(null);
-  const [qualityLabel, setQualityLabel] = useState<string | null>(
-    requirement.quality_status ?? null
-  );
+const formatDateRange = (start: string, end: string) => {
+  if (!start || !end) return "TBD";
+  const formatter = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "2-digit",
+  });
+  return `${formatter.format(new Date(start))} -> ${formatter.format(
+    new Date(end),
+  )}`;
+};
+
+const buildQualityPreview = (summary: BuyerRequirement["quality_summary"]) => {
+  if (!summary) return null;
+  const recorded_at = summary.created_at
+    ? new Date(summary.created_at).toLocaleString()
+    : null;
+  return {
+    status: summary.status,
+    recorded_at,
+    hash: summary.hash,
+    previous_hash: summary.previous_hash,
+    ...(summary.result ?? {}),
+  };
+};
+
+const formatLabel = (label: string) =>
+  label.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+
+export default function RequirementCard({ requirement }: RequirementCardProps) {
+  const [matches, setMatches] = useState<MarketplaceBatch[] | null>(null);
   const [isFetchingMatches, setIsFetchingMatches] = useState(false);
-  const [isRevalidating, setIsRevalidating] = useState(false);
+  const [matchError, setMatchError] = useState<string | null>(null);
+
+  const allowedLimits = useMemo(
+    () =>
+      Object.entries(requirement.allowed_contaminants ?? {}).filter(
+        ([, value]) => value !== null && value !== undefined,
+      ),
+    [requirement.allowed_contaminants],
+  );
+
+  const qualityDocuments = useMemo(
+    () => buildQualityPreview(requirement.quality_summary ?? null),
+    [requirement.quality_summary],
+  );
 
   const handleShowMatches = async () => {
     setIsFetchingMatches(true);
+    setMatchError(null);
     try {
-      const response = await fetchMatches(requirement.id);
-      setMatches(response);
+      const result = await fetchMatches(requirement.id);
+      setMatches(result);
     } catch (error) {
       setMatches([]);
+      setMatchError("Unable to reach the exporter marketplace.");
     } finally {
       setIsFetchingMatches(false);
-    }
-  };
-
-  const handleRevalidate = async () => {
-    setIsRevalidating(true);
-    try {
-      const payload = await revalidateRequirement(requirement.id);
-      setDocuments(payload.documents);
-      setQualityLabel(payload.quality_status);
-      onUpdated();
-    } catch (error) {
-      // swallow for now
-    } finally {
-      setIsRevalidating(false);
     }
   };
 
@@ -58,8 +78,8 @@ export default function RequirementCard({
       data-testid="requirement-card"
       className="w-full rounded-3xl border border-zinc-100 bg-white/80 p-6 shadow-lg shadow-zinc-950/5"
     >
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-3">
+        <div>
           <p className="text-xs uppercase tracking-widest text-zinc-500">
             {requirement.status} requirement
           </p>
@@ -67,18 +87,51 @@ export default function RequirementCard({
             {requirement.buyer_name}
           </h3>
           <p className="text-sm text-zinc-500">
-            Sourcing {requirement.volume_required} kg of{" "}
-            {requirement.product_type} between{" "}
-            {requirement.shipping_window_start} and{" "}
-            {requirement.shipping_window_end}
+            {requirement.min_volume.toLocaleString()} -{" "}
+            {requirement.max_volume.toLocaleString()} kg of{" "}
+            <span className="font-semibold text-zinc-900">
+              {requirement.commodity}
+            </span>{" "}
+            to{" "}
+            <span className="font-semibold">
+              {requirement.destination_country || "ANY"}
+            </span>
+          </p>
+          <p className="text-xs text-zinc-500">
+            Shipping window:{" "}
+            {formatDateRange(
+              requirement.shipping_window_start,
+              requirement.shipping_window_end,
+            )}
           </p>
         </div>
-        <p className="text-xs text-zinc-500">
-          Contaminant ceiling: {requirement.allowed_contaminants.total_ppm} ppm
-        </p>
-        <p className="text-sm text-zinc-500">
-          Latest ledger hash: {requirement.latest_qc_hash ?? "pending"}
-        </p>
+
+        {allowedLimits.length > 0 ? (
+          <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
+            {allowedLimits.map(([key, value]) => (
+              <span
+                key={key}
+                className="rounded-full border border-zinc-200 px-3 py-1 uppercase tracking-[0.3em]"
+              >
+                {formatLabel(key)} ≤ {value}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-zinc-400">
+            No contaminant limits specified.
+          </p>
+        )}
+
+        {requirement.standards.length > 0 ? (
+          <p className="text-xs text-zinc-500">
+            Standards: {requirement.standards.join(", ")}
+          </p>
+        ) : null}
+        {requirement.notes ? (
+          <p className="text-xs italic text-zinc-500">“{requirement.notes}”</p>
+        ) : null}
+
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -87,43 +140,65 @@ export default function RequirementCard({
           >
             {isFetchingMatches ? "Finding matches…" : "View matches"}
           </button>
-          <button
-            type="button"
-            className="rounded-full bg-emerald-600 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-500 disabled:opacity-60"
-            disabled={isRevalidating}
-            onClick={handleRevalidate}
-          >
-            {isRevalidating ? "Revalidating…" : "Revalidate QC"}
-          </button>
         </div>
+        {matchError ? (
+          <p className="text-xs text-rose-600">{matchError}</p>
+        ) : null}
       </div>
 
-      {matches && matches.length > 0 ? (
+      {matches ? (
         <div className="mt-4 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/30 p-4">
           <p className="text-xs uppercase tracking-widest text-emerald-700">
             Marketplace matches
           </p>
-          <ul className="mt-2 space-y-2 text-sm text-zinc-700">
-            {matches.map((match) => (
-              <li key={match.id} className="flex justify-between">
-                <span>{match.supplier}</span>
-                <span className="font-semibold text-emerald-700">
-                  {match.available_volume} kg
-                </span>
-              </li>
-            ))}
-          </ul>
+          {matches.length === 0 ? (
+            <p className="mt-2 text-xs text-emerald-800">
+              No eligible batches yet. New QC-passed batches will appear here.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-3 text-sm text-zinc-700">
+              {matches.map((match) => (
+                <li
+                  key={match.batch_code}
+                  className="rounded-xl border border-emerald-100 bg-white/80 p-3"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="font-semibold text-zinc-900">
+                        {match.supplier.name}
+                      </p>
+                      <p className="text-xs uppercase tracking-[0.4em] text-emerald-600">
+                        {match.region} {"->"} {match.destination_country}
+                      </p>
+                    </div>
+                    <div className="text-right text-sm font-semibold text-emerald-700">
+                      {match.volume_available.toLocaleString()} {match.unit}
+                    </div>
+                  </div>
+                  <div className="mt-2 grid gap-2 text-xs text-zinc-500 sm:grid-cols-3">
+                    <p>Mercury: {match.contaminant_mercury_ppm ?? "—"} ppm</p>
+                    <p>Cesium: {match.contaminant_cesium_ppm ?? "—"} ppm</p>
+                    <p>E. coli: {match.contaminant_ecoli_cfu ?? "—"} cfu</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       ) : null}
 
-      {documents ? (
+      {qualityDocuments ? (
         <section className="mt-4 grid gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/80 p-4 text-sm text-zinc-600">
           <p className="text-xs uppercase tracking-widest text-zinc-500">
-            {qualityLabel ?? "Quality pending"}
+            QC summary
           </p>
-          <DocumentPreview documents={documents} />
+          <DocumentPreview documents={qualityDocuments} />
         </section>
-      ) : null}
+      ) : (
+        <p className="mt-4 text-xs text-zinc-400">
+          QC simulation pending for this requirement.
+        </p>
+      )}
     </article>
   );
 }

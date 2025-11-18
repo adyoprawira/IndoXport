@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -19,12 +19,24 @@ class BuyerRequirement(models.Model):
         (STATUS_DONE, "Settled"),
     ]
 
-    buyer_name = models.CharField(max_length=128)
+    buyer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="buyer_requirements",
+        null=True,
+        blank=True,
+    )
+    buyer_name = models.CharField(max_length=128, blank=True)
     product_type = models.CharField(max_length=64)
-    volume_required = models.PositiveIntegerField()
+    min_volume = models.PositiveIntegerField(default=0)
+    max_volume = models.PositiveIntegerField(default=0)
+    volume_required = models.PositiveIntegerField(default=0)
     allowed_contaminants = models.JSONField(default=dict)
     shipping_window_start = models.DateField()
     shipping_window_end = models.DateField()
+    destination_country = models.CharField(max_length=64, blank=True)
+    standards = models.JSONField(default=list, blank=True)
+    notes = models.TextField(blank=True)
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default=STATUS_OPEN
     )
@@ -34,21 +46,15 @@ class BuyerRequirement(models.Model):
     def latest_quality_check(self) -> "QualityCheckLog | None":
         return self.quality_checks.order_by("-created_at").first()
 
-    def as_dict(self) -> dict[str, Any]:
-        latest_qc = self.latest_quality_check()
-        return {
-            "id": self.id,
-            "buyer_name": self.buyer_name,
-            "product_type": self.product_type,
-            "volume_required": self.volume_required,
-            "allowed_contaminants": self.allowed_contaminants,
-            "shipping_window_start": str(self.shipping_window_start),
-            "shipping_window_end": str(self.shipping_window_end),
-            "status": self.status,
-            "quality_status": latest_qc.status if latest_qc else None,
-            "latest_qc_hash": latest_qc.hash if latest_qc else None,
-            "created_at": self.created_at.isoformat(),
-        }
+    def save(self, *args, **kwargs):
+        if self.max_volume:
+            self.volume_required = self.max_volume
+        elif self.min_volume:
+            self.volume_required = self.min_volume
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"{self.product_type} requirement #{self.pk}"
 
 
 class QualityCheckLog(models.Model):
@@ -97,3 +103,62 @@ class QualityCheckLog(models.Model):
             json.dumps(payload, sort_keys=True).encode("utf-8")
         ).hexdigest()
         super().save(*args, **kwargs)
+
+
+class BuyerProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="buyer_profile",
+    )
+    organization = models.CharField(max_length=128)
+    country = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.organization} ({self.country})"
+
+
+class BatchMarketInfo(models.Model):
+    batch = models.OneToOneField(
+        "suppliers.ProductBatch",
+        on_delete=models.CASCADE,
+        related_name="market_info",
+    )
+    species = models.CharField(max_length=128)
+    size_min_mm = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+    size_max_mm = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True
+    )
+    region = models.CharField(max_length=128, blank=True)
+    country_of_origin = models.CharField(max_length=64, blank=True)
+    harvest_date = models.DateField(null=True, blank=True)
+    ready_date = models.DateField(null=True, blank=True)
+    destination_country = models.CharField(max_length=64, blank=True)
+    price_per_unit = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    contaminant_mercury_ppm = models.DecimalField(
+        max_digits=6, decimal_places=3, null=True, blank=True
+    )
+    contaminant_cesium_ppm = models.DecimalField(
+        max_digits=6, decimal_places=3, null=True, blank=True
+    )
+    contaminant_ecoli_cfu = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-harvest_date", "-batch__created_at"]
+
+    def __str__(self) -> str:
+        return f"Marketplace info for {self.batch.batch_code}"
