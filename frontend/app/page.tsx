@@ -121,16 +121,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Decorative shrimp */}
-        <div className="pointer-events-none relative -mt-8">
-          <div className="absolute left-4 top-6 hidden sm:block">
-            <Image src="/shrimp.png" alt="shrimp decoration" width={48} height={48} className="h-12 w-12" />
-          </div>
-          <div className="absolute right-4 top-28 hidden sm:block">
-            <Image src="/shrimp.png" alt="shrimp decoration" width={40} height={40} className="h-10 w-10 opacity-70" />
-          </div>
-        </div>
-
         {/* Features */}
         <section className="grid gap-6 sm:grid-cols-3">
           {[
