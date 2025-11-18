@@ -9,16 +9,14 @@ import { BuyerRequirement, fetchRequirements } from "@/lib/api";
 export default function BuyerDashboard() {
   const [requirements, setRequirements] = useState<BuyerRequirement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const loadRequirements = useCallback(async () => {
     setLoading(true);
     try {
       const payload = await fetchRequirements();
       setRequirements(payload.results);
-      setError(null);
     } catch (loadError) {
-      setError("Unable to reach the buyer ledger.");
+      console.warn("[IndoXport demo] Failed to refresh requirements", loadError);
+      setRequirements([]);
     } finally {
       setLoading(false);
     }
@@ -29,9 +27,9 @@ export default function BuyerDashboard() {
   }, [loadRequirements]);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+    <div className="space-y-6">
       <RequirementForm onSaved={loadRequirements} />
-      <div className="space-y-4">
+      <section className="space-y-4 rounded-3xl border border-zinc-100 bg-white/90 p-6 shadow-lg shadow-zinc-900/5">
         <div className="flex flex-col gap-2">
           <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
             Requirement board
@@ -41,13 +39,11 @@ export default function BuyerDashboard() {
           </h2>
           <p className="text-sm text-zinc-500">
             The ledger-like digest surfaces QC-approved requirements for exporters
-            to explore. Tap into a requirement to see marketplace matches,
-            revalidate QC, and trigger document packs.
+            to explore. Tap into a requirement to inspect marketplace matches
+            and the simulated QC hash trail that backs each demand signal.
           </p>
         </div>
-        {error ? (
-          <p className="text-sm text-rose-600">{error}</p>
-        ) : loading ? (
+        {loading ? (
           <p className="text-sm text-zinc-500">Loading requirements…</p>
         ) : (
           <div className="space-y-4">
@@ -57,16 +53,12 @@ export default function BuyerDashboard() {
               </p>
             ) : (
               requirements.map((requirement) => (
-                <RequirementCard
-                  key={requirement.id}
-                  requirement={requirement}
-                  onUpdated={loadRequirements}
-                />
+                <RequirementCard key={requirement.id} requirement={requirement} />
               ))
             )}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

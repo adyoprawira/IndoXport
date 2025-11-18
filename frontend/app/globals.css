@@ -39,3 +39,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Improve contrast for muted copy that previously used Tailwind's zinc-400/500 */
+.text-zinc-400 {
+  color: #52525b !important; /* approx zinc-600 */
+}
+
+.text-zinc-500 {
+  color: #3f3f46 !important; /* approx zinc-700 */
+}

@@ -1,7 +1,5 @@
 import Image from "next/image";
 
-import BuyerDashboard from "@/components/BuyerDashboard";
-
 export default function Home() {
   return (
     <div className="bg-white font-sans">
@@ -22,7 +20,7 @@ export default function Home() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href="/supplier"
+                href="/supplier/batches"
                 className="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-900"
               >
                 For Suppliers — Dashboard
@@ -35,12 +33,6 @@ export default function Home() {
                 Marketplace — Verified Batches
               </a>
 
-              <a
-                href="/buyers"
-                className="inline-flex items-center justify-center rounded-full bg-green-600 px-5 py-3 text-sm font-semibold text-white hover:bg-green-700"
-              >
-                For Buyers — Search & Filter
-              </a>
             </div>
 
             <div className="mt-8 grid grid-cols-3 gap-4 sm:max-w-md">
@@ -121,16 +113,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Decorative shrimp */}
-        <div className="pointer-events-none relative -mt-8">
-          <div className="absolute left-4 top-6 hidden sm:block">
-            <Image src="/shrimp.png" alt="shrimp decoration" width={48} height={48} className="h-12 w-12" />
-          </div>
-          <div className="absolute right-4 top-28 hidden sm:block">
-            <Image src="/shrimp.png" alt="shrimp decoration" width={40} height={40} className="h-10 w-10 opacity-70" />
-          </div>
-        </div>
-
         {/* Features */}
         <section className="grid gap-6 sm:grid-cols-3">
           {[
@@ -140,7 +122,7 @@ export default function Home() {
             },
             {
               title: "QC Ledger",
-              detail: "Hash-linked QC logs that prevent retroactive tampering and increase buyer confidence.",
+              detail: "Hash-linked QC logs that prevent retroactive tampering and increase partner confidence.",
             },
             {
               title: "Automation & Matchmaking",
@@ -156,7 +138,7 @@ export default function Home() {
 
         {/* CTA bar */}
         <section className="rounded-lg bg-white p-8 text-center shadow-sm">
-          <h3 className="text-xl font-semibold text-black">Ready to reduce export risk and reach global buyers?</h3>
+          <h3 className="text-xl font-semibold text-black">Ready to reduce export risk and scale your reach?</h3>
           <p className="mt-2 text-sm text-zinc-600">
             Start with a demo or register your first batch to see the QC simulation and ledger in action.
           </p>
@@ -173,62 +155,24 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Buyer experience detail */}
-        <section className="space-y-4 rounded-3xl bg-white/80 p-8 shadow-xl shadow-zinc-950/5 ring-1 ring-zinc-100">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">IndoXport Buyer Flow</p>
-          <h2 className="text-3xl font-semibold text-zinc-900 sm:text-4xl">
-            Match exporter demand to clean Indonesian batches faster
-          </h2>
-          <p className="text-lg text-zinc-600">
-            The buyer experience begins with structured requirements, a simulated quality-check ledger, and a curated marketplace
-            that highlights the right exporters and documentation bundles.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              {
-                title: "Structured demand",
-                body: "Buyers specify contaminants, volumes, and shipping windows in one form.",
-              },
-              {
-                title: "Immersive matching",
-                body: "Exporters see which supplier batches pass the simulated QC and fit their needs.",
-              },
-              {
-                title: "Actionable docs",
-                body: "Revalidation triggers templated invoices, COOs, and health certifications for demos.",
-              },
-            ].map((card) => (
-              <div key={card.title} className="rounded-2xl border border-zinc-100 bg-zinc-50/80 p-4 text-sm">
-                <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">{card.title}</p>
-                <p className="mt-2 text-zinc-600">{card.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Requirement board + marketplace matching */}
-        <section className="space-y-8 rounded-3xl bg-white/90 p-8 shadow-2xl shadow-zinc-950/5 ring-1 ring-zinc-100">
-          <BuyerDashboard />
-        </section>
-
         {/* Payment simulation callout */}
-        <section className="grid gap-6 rounded-3xl bg-zinc-950/80 p-8 text-white shadow-2xl shadow-zinc-950/20 sm:grid-cols-2">
+        <section className="grid gap-6 rounded-3xl border border-black/5 bg-white p-8 text-black shadow-2xl shadow-zinc-900/10 sm:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">Payment simulation</p>
-            <h3 className="mt-2 text-2xl font-semibold">T/T and L/C inspired flows</h3>
-            <p className="mt-4 max-w-lg text-sm text-zinc-200">
+            <p className="text-xs uppercase tracking-[0.4em] text-black">Payment simulation</p>
+            <h3 className="mt-2 text-2xl font-semibold text-black">T/T and L/C inspired flows</h3>
+            <p className="mt-4 max-w-lg text-sm text-black">
               Pilih jalur T/T atau L/C untuk menunjukkan bagaimana IndoXport melacak QC, dokumen, dan status pembayaran di dalam MVP.
             </p>
           </div>
-          <div className="space-y-4 rounded-2xl border border-zinc-800/40 bg-white/5 p-4 text-sm">
+          <div className="space-y-4 rounded-2xl border border-black/10 bg-white p-4 text-sm text-black">
             {[
               { label: "1. QC revalidation", detail: "Simulated lab pass recorded in ledger." },
               { label: "2. Commercial docs", detail: "Invoice, COO, and health certificate ready for export." },
               { label: "3. Payment status", detail: "T/T wiring or L/C confirmation surfaced for demos." },
             ].map((step) => (
               <div key={step.label} className="space-y-1">
-                <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">{step.label}</p>
-                <p className="text-zinc-50">{step.detail}</p>
+                <p className="text-xs uppercase tracking-[0.4em] text-black">{step.label}</p>
+                <p className="text-black">{step.detail}</p>
               </div>
             ))}
           </div>
