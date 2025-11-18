@@ -40,6 +40,14 @@ export default function LoginPage() {
 
       // Simpan user
       setUser(data.user);
+      // Persist simple auth_user for frontend demo (used by settings/profile pages)
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("auth_user", JSON.stringify(data.user));
+        } catch (e) {
+          // ignore
+        }
+      }
       setStatus("Login success.");
 
       // 🔥 Redirect after login
