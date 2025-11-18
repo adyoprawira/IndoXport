@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'suppliers',
     "corsheaders",
     "buyers",
+    "accounts",
     "exporter"
 ]
 REST_FRAMEWORK = {
