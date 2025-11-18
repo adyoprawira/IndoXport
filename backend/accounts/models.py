@@ -31,6 +31,7 @@ class UserProfile(models.Model):
     domicile = models.CharField(max_length=100, blank=True)
     birth_place = models.CharField(max_length=100, blank=True)
     birth_date = models.DateField(null=True, blank=True)
+    photo = models.ImageField(upload_to="profile_photos/", null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username} ({self.role})"
