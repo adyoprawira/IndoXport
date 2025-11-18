@@ -9,6 +9,8 @@ from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 from .models import UserProfile
 from django.utils.dateparse import parse_date
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 
 class RegisterView(APIView):
@@ -147,6 +149,7 @@ class ProfileView(APIView):
                 "domicile": profile.domicile,
                 "birth_place": profile.birth_place,
                 "birth_date": profile.birth_date.isoformat() if profile.birth_date else None,
+                "photoUrl": request.build_absolute_uri(profile.photo.url) if getattr(profile, "photo") and profile.photo.name else None,
             })
 
         return Response({"user": out})
@@ -213,6 +216,54 @@ class ProfileView(APIView):
             "role": profile.role,
         }
         return Response({"user": out})
+
+
+class ProfilePhotoUploadView(APIView):
+    """Upload a profile photo for a user.
+
+    Accepts multipart/form-data with `file` and optional `user_id` (for demo). If `user_id` is
+    provided, use that user; otherwise use the authenticated user or the first user as demo fallback.
+    Returns JSON with `photoUrl` absolute URL on success.
+    """
+
+    def post(self, request):
+        User = get_user_model()
+
+        file = request.FILES.get("file") or request.FILES.get("photo")
+        if not file:
+            return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = None
+        user_id = request.POST.get("user_id") or request.data.get("user_id")
+        if user_id:
+            try:
+                user = User.objects.get(id=int(user_id))
+            except Exception:
+                user = None
+
+        if not user:
+            if request.user and request.user.is_authenticated:
+                user = request.user
+            else:
+                user = User.objects.first()
+
+        if not user:
+            return Response({"error": "No user to attach photo to"}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile = getattr(user, "profile", None)
+        if not profile:
+            profile = UserProfile.objects.create(user=user, role="supplier")
+
+        # Use Django's storage to save file
+        try:
+            # generate a filename in upload_to folder
+            filename = file.name
+            profile.photo.save(filename, file, save=True)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        photo_url = request.build_absolute_uri(profile.photo.url) if profile.photo and profile.photo.name else None
+        return Response({"photoUrl": photo_url})
 
 
 class ChangePasswordView(APIView):
