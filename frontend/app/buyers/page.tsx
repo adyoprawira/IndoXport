@@ -60,7 +60,7 @@ export default function BuyersPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 rounded-3xl bg-white p-8 shadow-xl shadow-zinc-200/60 ring-1 ring-zinc-100 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="grid gap-6 rounded-3xl bg-white p-8 shadow-xl shadow-zinc-200/60 ring-1 ring-zinc-100 lg:grid-cols-[1fr_1.2fr]">
           <div className="space-y-5">
             <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">Requirement board</p>
             <h2 className="text-2xl font-semibold text-zinc-900">
@@ -86,21 +86,21 @@ export default function BuyersPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl bg-zinc-950 p-8 text-white shadow-2xl shadow-zinc-950/40">
+        <section className="rounded-3xl bg-white p-8 text-zinc-900 shadow-2xl shadow-zinc-950/10 ring-1 ring-zinc-100">
           <div className="grid gap-8 lg:grid-cols-2">
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">Payment storyline</p>
-              <h3 className="mt-2 text-2xl font-semibold">Simulate T/T or L/C steps without wiring a cent</h3>
-              <p className="mt-3 text-sm text-zinc-200">
+              <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">Payment storyline</p>
+              <h3 className="mt-2 text-2xl font-semibold text-zinc-900">Simulate T/T or L/C steps without wiring a cent</h3>
+              <p className="mt-3 text-sm text-zinc-600">
                 IndoXport visualizes how QC hashes, documentation, and payment checkpoints align. During the hackathon demo,
                 flip between T/T and L/C to show how the ledger drives confidence before the money moves.
               </p>
             </div>
-            <div className="space-y-3 rounded-3xl border border-zinc-800/50 bg-white/5 p-4 text-sm">
+            <div className="space-y-3 rounded-3xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700">
               {["QC revalidation recorded", "Docs assembled", "Payment status updated"].map((item, index) => (
                 <div key={item}>
-                  <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">{`Step ${index + 1}`}</p>
-                  <p className="text-zinc-100">{item}</p>
+                  <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">{`Step ${index + 1}`}</p>
+                  <p className="text-base font-semibold text-zinc-900">{item}</p>
                 </div>
               ))}
             </div>

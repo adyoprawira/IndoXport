@@ -212,23 +212,23 @@ export default function Home() {
         </section>
 
         {/* Payment simulation callout */}
-        <section className="grid gap-6 rounded-3xl bg-zinc-950/80 p-8 text-white shadow-2xl shadow-zinc-950/20 sm:grid-cols-2">
+        <section className="grid gap-6 rounded-3xl border border-black/5 bg-white p-8 text-black shadow-2xl shadow-zinc-900/10 sm:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">Payment simulation</p>
-            <h3 className="mt-2 text-2xl font-semibold">T/T and L/C inspired flows</h3>
-            <p className="mt-4 max-w-lg text-sm text-zinc-200">
+            <p className="text-xs uppercase tracking-[0.4em] text-black">Payment simulation</p>
+            <h3 className="mt-2 text-2xl font-semibold text-black">T/T and L/C inspired flows</h3>
+            <p className="mt-4 max-w-lg text-sm text-black">
               Pilih jalur T/T atau L/C untuk menunjukkan bagaimana IndoXport melacak QC, dokumen, dan status pembayaran di dalam MVP.
             </p>
           </div>
-          <div className="space-y-4 rounded-2xl border border-zinc-800/40 bg-white/5 p-4 text-sm">
+          <div className="space-y-4 rounded-2xl border border-black/10 bg-white p-4 text-sm text-black">
             {[
               { label: "1. QC revalidation", detail: "Simulated lab pass recorded in ledger." },
               { label: "2. Commercial docs", detail: "Invoice, COO, and health certificate ready for export." },
               { label: "3. Payment status", detail: "T/T wiring or L/C confirmation surfaced for demos." },
             ].map((step) => (
               <div key={step.label} className="space-y-1">
-                <p className="text-xs uppercase tracking-[0.4em] text-zinc-400">{step.label}</p>
-                <p className="text-zinc-50">{step.detail}</p>
+                <p className="text-xs uppercase tracking-[0.4em] text-black">{step.label}</p>
+                <p className="text-black">{step.detail}</p>
               </div>
             ))}
           </div>

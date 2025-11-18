@@ -29,7 +29,7 @@ export default function BuyerDashboard() {
   }, [loadRequirements]);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
       <RequirementForm onSaved={loadRequirements} />
       <div className="space-y-4">
         <div className="flex flex-col gap-2">
