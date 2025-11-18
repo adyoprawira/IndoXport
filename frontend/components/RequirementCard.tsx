@@ -44,7 +44,6 @@ const formatLabel = (label: string) =>
 export default function RequirementCard({ requirement }: RequirementCardProps) {
   const [matches, setMatches] = useState<MarketplaceBatch[] | null>(null);
   const [isFetchingMatches, setIsFetchingMatches] = useState(false);
-  const [matchError, setMatchError] = useState<string | null>(null);
 
   const allowedLimits = useMemo(
     () =>
@@ -81,13 +80,15 @@ export default function RequirementCard({ requirement }: RequirementCardProps) {
 
   const handleShowMatches = async () => {
     setIsFetchingMatches(true);
-    setMatchError(null);
     try {
       const result = await fetchMatches(requirement.id);
       setMatches(result);
     } catch (error) {
+      console.warn(
+        `[IndoXport demo] Failed to fetch marketplace matches for requirement ${requirement.id}`,
+        error,
+      );
       setMatches([]);
-      setMatchError("Unable to reach the exporter marketplace.");
     } finally {
       setIsFetchingMatches(false);
     }
@@ -161,9 +162,6 @@ export default function RequirementCard({ requirement }: RequirementCardProps) {
             {isFetchingMatches ? "Finding matches…" : "View matches"}
           </button>
         </div>
-        {matchError ? (
-          <p className="text-xs text-rose-600">{matchError}</p>
-        ) : null}
       </div>
 
       {matches ? (

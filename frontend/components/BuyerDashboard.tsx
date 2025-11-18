@@ -9,16 +9,14 @@ import { BuyerRequirement, fetchRequirements } from "@/lib/api";
 export default function BuyerDashboard() {
   const [requirements, setRequirements] = useState<BuyerRequirement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const loadRequirements = useCallback(async () => {
     setLoading(true);
     try {
       const payload = await fetchRequirements();
       setRequirements(payload.results);
-      setError(null);
     } catch (loadError) {
-      setError("Unable to reach the buyer ledger.");
+      console.warn("[IndoXport demo] Failed to refresh requirements", loadError);
+      setRequirements([]);
     } finally {
       setLoading(false);
     }
@@ -45,9 +43,7 @@ export default function BuyerDashboard() {
             and the simulated QC hash trail that backs each demand signal.
           </p>
         </div>
-        {error ? (
-          <p className="text-sm text-rose-600">{error}</p>
-        ) : loading ? (
+        {loading ? (
           <p className="text-sm text-zinc-500">Loading requirements…</p>
         ) : (
           <div className="space-y-4">

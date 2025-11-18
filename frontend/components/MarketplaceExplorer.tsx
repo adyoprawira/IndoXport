@@ -47,7 +47,6 @@ export default function MarketplaceExplorer() {
   const [batches, setBatches] = useState<MarketplaceBatch[]>([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const loadMarketplace = useCallback(async () => {
     setLoading(true);
@@ -55,9 +54,8 @@ export default function MarketplaceExplorer() {
       const response = await fetchMarketplace(appliedFilters);
       setBatches(response.results);
       setCount(response.count ?? response.results.length);
-      setError(null);
     } catch (err) {
-      setError("Unable to fetch buyer marketplace data.");
+      console.warn("[IndoXport demo] Failed to load marketplace", err);
       setBatches([]);
     } finally {
       setLoading(false);
@@ -240,12 +238,6 @@ export default function MarketplaceExplorer() {
           </div>
         </form>
       </section>
-
-      {error ? (
-        <p className="rounded-3xl border border-rose-100 bg-rose-50/80 p-4 text-sm text-rose-700">
-          {error}
-        </p>
-      ) : null}
 
       <section className="grid gap-6 sm:grid-cols-2">
         {batches.map((batch) => (
