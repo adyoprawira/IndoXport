@@ -37,6 +37,7 @@ urlpatterns = [
     path("api/", include("user_settings.urls")),
     path("", include("buyers.urls")),
     path("api/auth/", include("accounts.urls")),
+    path('api/exporter/', include('exporter.urls')),  
 ]
 
 if settings.DEBUG:
