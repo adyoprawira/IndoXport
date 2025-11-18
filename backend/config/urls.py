@@ -35,7 +35,8 @@ urlpatterns = [
     path("api/", include(router.urls)),
     # Stub API for user settings (backend/user_settings)
     path("api/", include("user_settings.urls")),
-    path("", include("buyers.urls"))
+    path("", include("buyers.urls")),
+    path("api/auth/", include("accounts.urls")),
 ]
 
 if settings.DEBUG:
