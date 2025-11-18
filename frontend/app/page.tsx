@@ -22,7 +22,7 @@ export default function Home() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href="/supplier"
+                href="/supplier/batches"
                 className="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-900"
               >
                 For Suppliers — Dashboard
